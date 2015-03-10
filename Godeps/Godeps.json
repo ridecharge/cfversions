@@ -1,0 +1,5 @@
+{
+	"ImportPath": "github.com/ridecharge/curbformation-version-service",
+	"GoVersion": "go1.3.3",
+	"Deps": []
+}
