@@ -26,6 +26,6 @@ func main() {
 			os.Exit(0)
 		}
 	}()
-
+	version.NewVersion()
 	http.ListenAndServe(":8080", nil)
 }

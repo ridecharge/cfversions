@@ -1,16 +1,26 @@
 package version
 
-import "github.com/goamz/goamz/cloudformation"
-import "github.com/goamz/goamz/aws"
+import (
+	"github.com/goamz/goamz/aws"
+	"github.com/goamz/goamz/cloudformation"
+	"log"
+	"time"
+)
 
-var verServ
+var (
+	verServ VersionServ
+)
 
 func init() {
 	verServ = &versionServ{}
-	cloudformation.New(aws.GetAuth(nil, nil, nil, nil), aws.USEast)
+	auth, err := aws.GetAuth("", "", "", time.Now())
+	if err != nil {
+		log.Panic("Could not find AWS Credentials")
+	}
+	cloudformation.New(auth, aws.USEast)
 }
 
-func New() {
+func NewVersionServ() VersionServ {
 	return verServ
 }
 
