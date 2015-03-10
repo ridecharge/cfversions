@@ -1,14 +1,22 @@
 package version
 
 import (
+	"curbformation-version-service/version_service"
 	"encoding/json"
 )
 
+func init() {
+}
+
+func New() {
+	return &version{}
+}
+
 type version struct {
-	Version         String `json:"version"`
-	Name            String `json:"appName"`
-	PrivateEndPoint String `json:"privateUrl"`
-	PublicEndPoint  String `json:"publicUrl"`
+	Version         string `json:"version"`
+	Name            string `json:"name"`
+	PrivateEndPoint string `json:"privateUrl"`
+	PublicEndPoint  string `json:"publicUrl"`
 }
 
 type Version interface {
