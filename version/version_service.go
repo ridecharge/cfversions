@@ -1,31 +1,77 @@
 package version
 
 import (
+	"encoding/json"
 	"github.com/goamz/goamz/aws"
 	"github.com/goamz/goamz/cloudformation"
+	"github.com/hashicorp/consul/api"
+	"io"
 	"log"
 	"time"
 )
 
 var (
-	verServ VersionServ
+	s VersionServ
 )
 
-func init() {
-	verServ = &versionServ{}
-	auth, err := aws.GetAuth("", "", "", time.Now())
-	if err != nil {
-		log.Panic("Could not find AWS Credentials")
-	}
-	cloudformation.New(auth, aws.USEast)
-}
-
-func NewVersionServ() VersionServ {
-	return verServ
-}
-
 type versionServ struct {
+	cf          *cloudformation.CloudFormation
+	environment string
 }
 
 type VersionServ interface {
+	FindVersions(names []string) ([]*version, error)
+	EncodeVersions(w io.Writer, versions []*version) error
+}
+
+func NewVersionServ() VersionServ {
+	if s == nil {
+		s = newVersionServ()
+	}
+	return s
+}
+
+func newConsulConfig() *api.Config {
+	return &api.Config{
+		Address: "consul",
+		Scheme:  "http"}
+}
+
+func newVersionServ() VersionServ {
+	client, err := api.NewClient(newConsulConfig())
+	if err != nil {
+		log.Fatal("Could not configure consul api.")
+	}
+
+	kvpair, _, err := client.KV().Get("environment", nil)
+	if err != nil {
+		log.Fatal("Could not get the environment key from consul.")
+	}
+
+	auth, err := aws.GetAuth("", "", "", time.Now())
+	if err != nil {
+		log.Fatal("Could not find AWS Credentials")
+	}
+
+	cfn := cloudformation.New(auth, aws.USEast)
+	return &versionServ{cf: cfn, environment: string(kvpair.Value)}
+}
+
+func (s *versionServ) EncodeVersions(w io.Writer, versions []*version) error {
+	return json.NewEncoder(w).Encode(versions)
+}
+
+func (s *versionServ) FindVersions(names []string) ([]*version, error) {
+	versions := make([]*version, 0)
+	for _, name := range names {
+		response, err := s.cf.DescribeStacks(s.environment+"-"+name, "")
+		if err == nil {
+			outputs := make(map[string]string)
+			for _, output := range response.Stacks[0].Outputs {
+				outputs[output.OutputKey] = output.OutputValue
+			}
+			versions = append(versions, NewVersion(outputs))
+		}
+	}
+	return versions, nil
 }

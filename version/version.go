@@ -2,20 +2,17 @@ package version
 
 import ()
 
-func init() {
-}
-
-func NewVersion() Version {
-	return &version{verServ: NewVersionServ()}
+func NewVersion(props map[string]string) *version {
+	return &version{
+		Version:         props["Version"],
+		ApplicationName: props["ApplicationName"],
+		PrivateEndPoint: props["PrivateEndPoint"],
+		PublicEndPoint:  props["PublicEndPoint"]}
 }
 
 type version struct {
 	Version         string `json:"version"`
-	Name            string `json:"name"`
-	PrivateEndPoint string `json:"privateUrl"`
-	PublicEndPoint  string `json:"publicUrl"`
-	verServ         VersionServ
-}
-
-type Version interface {
+	ApplicationName string `json:"name"`
+	PrivateEndPoint string `json:"privateEndPoint"`
+	PublicEndPoint  string `json:"publicEndPoint"`
 }
