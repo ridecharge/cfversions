@@ -30,7 +30,7 @@ func (h *versionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if versions == nil {
+	if len(versions) < 1 {
 		w.WriteHeader(404)
 		return
 	}

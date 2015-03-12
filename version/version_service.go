@@ -33,7 +33,7 @@ func NewVersionServ() VersionServ {
 
 func newConsulConfig() *api.Config {
 	return &api.Config{
-		Address: "consul",
+		Address: "consul:8500",
 		Scheme:  "http"}
 }
 
@@ -58,19 +58,24 @@ func newVersionServ() VersionServ {
 }
 
 func (s *versionServ) EncodeVersions(w io.Writer, versions []*version) error {
+	log.Print("Encoding Version Objects to JSON")
 	return json.NewEncoder(w).Encode(versions)
 }
 
 func (s *versionServ) FindVersions(names []string) ([]*version, error) {
 	versions := make([]*version, 0)
 	for _, name := range names {
-		response, err := s.cf.DescribeStacks(s.environment+"-"+name, "")
+		stack_name := s.environment + "-" + name
+		log.Printf("DescribingStack %s", stack_name)
+		response, err := s.cf.DescribeStacks(stack_name, "")
 		if err == nil {
 			outputs := make(map[string]string)
 			for _, output := range response.Stacks[0].Outputs {
 				outputs[output.OutputKey] = output.OutputValue
 			}
 			versions = append(versions, NewVersion(outputs))
+		} else {
+			log.Print(err)
 		}
 	}
 	return versions, nil

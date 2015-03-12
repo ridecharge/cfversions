@@ -1,8 +1,11 @@
 package version
 
-import ()
+import (
+	"log"
+)
 
 func NewVersion(props map[string]string) *version {
+	log.Print("Creating New Version Object")
 	return &version{
 		Version:         props["Version"],
 		ApplicationName: props["ApplicationName"],
