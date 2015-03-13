@@ -10,7 +10,8 @@ func NewVersion(props map[string]string) *version {
 		Version:         props["Version"],
 		ApplicationName: props["ApplicationName"],
 		PrivateEndPoint: props["PrivateEndPoint"],
-		PublicEndPoint:  props["PublicEndPoint"]}
+		PublicEndPoint:  props["PublicEndPoint"],
+	}
 }
 
 type version struct {
