@@ -1,7 +1,11 @@
 {
-	"ImportPath": "github.com/ridecharge/curbformation-version-service",
+	"ImportPath": "github.com/ridecharge/cf-versions",
 	"GoVersion": "go1.4",
 	"Deps": [
+		{
+			"ImportPath": "github.com/goamz/goamz/autoscaling",
+			"Rev": "2a8fed5e89ab9e16210fc337d1aac780e8c7bbb7"
+		},
 		{
 			"ImportPath": "github.com/goamz/goamz/aws",
 			"Rev": "2a8fed5e89ab9e16210fc337d1aac780e8c7bbb7"

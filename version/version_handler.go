@@ -18,20 +18,28 @@ func health(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *versionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	names := make([]string, 0)
+	var (
+		names    []string
+		err      error
+		versions []*version
+	)
+
 	if len(r.URL.Query()["names"]) > 0 {
 		names = r.URL.Query()["names"]
+	} else {
+		if names, err = h.s.FindAllVersionNames(); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 
-	versions, err := h.s.FindVersions(names)
-
-	if err != nil {
-		w.WriteHeader(500)
+	if versions, err = h.s.FindVersions(names); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	if len(versions) < 1 {
-		w.WriteHeader(404)
+		http.NotFound(w, r)
 		return
 	}
 

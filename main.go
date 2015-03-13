@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/ridecharge/curbformation-version-service/version"
+	"github.com/ridecharge/cf-versions/version"
 	"net/http"
 )
 
