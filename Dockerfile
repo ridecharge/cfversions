@@ -24,4 +24,5 @@ RUN rm -r $GOROOT
 RUN rm -r $GOPATH
 RUN apt-get purge -y --auto-remove git
 
+EXPOSE 8080/tcp
 ENTRYPOINT ["/usr/bin/cf-versions"]

@@ -1,2 +1,2 @@
 #!/bin/sh
-docker push sgarlick987/cf-versions
+docker push ridecharge/cf-versions

@@ -90,18 +90,6 @@ func TestServeHTTPFindVersionErr(t *testing.T) {
 	}
 }
 
-func TestServeHTTPNoVersionFound(t *testing.T) {
-	w := httptest.NewRecorder()
-	r, _ := http.NewRequest("GET", "/versions", nil)
-	s := &notFoundVersionServ{}
-	h := &versionHandler{s: s}
-	h.ServeHTTP(w, r)
-
-	if w.Code != 404 {
-		t.Error("HTTP 404 should be returned when nothing found.")
-	}
-}
-
 func TestServeHTTPNoNames(t *testing.T) {
 	w := httptest.NewRecorder()
 	r, _ := http.NewRequest("GET", "/versions", nil)

@@ -38,11 +38,6 @@ func (h *versionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(versions) < 1 {
-		http.NotFound(w, r)
-		return
-	}
-
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(200)
 	h.s.EncodeVersions(w, versions)
