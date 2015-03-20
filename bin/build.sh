@@ -1,2 +1,2 @@
 #!/bin/sh
-docker build -t sgarlick987/cf-versions .
+docker build -t ridecharge/cfversions .

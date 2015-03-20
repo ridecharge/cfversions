@@ -1,2 +1,2 @@
 #!/bin/sh
-docker push ridecharge/cf-versions
+docker push ridecharge/cfversions
