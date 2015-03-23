@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/ridecharge/cf-versions/version"
+	"github.com/ridecharge/cfversions/versions"
 	"net/http"
 )
 
 func main() {
-	version.RegisterHandlers()
+	versions.RegisterHandlers()
 	http.ListenAndServe(":8080", nil)
 }
