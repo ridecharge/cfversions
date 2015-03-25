@@ -58,7 +58,7 @@ func (s *versionServ) watchVersionNames() {
 }
 
 func (s *versionServ) encodeVersions(w io.Writer, versions []*version) error {
-	log.Print("Encoding Version Objects to JSON")
+	log.Println("Encoding Version Objects to JSON")
 	return json.NewEncoder(w).Encode(versions)
 }
 
@@ -69,7 +69,7 @@ func (s *versionServ) findVersions(names []string) ([]*version, error) {
 	}
 	vs := make([]*version, 0, len(names))
 	for _, name := range vn {
-		println("key_prefix: ", name)
+		log.Println("key_prefix: ", name)
 		kvs, _, err := s.c.KV().List(name, nil)
 		if err != nil {
 			return nil, err
@@ -80,7 +80,7 @@ func (s *versionServ) findVersions(names []string) ([]*version, error) {
 
 		props := make(map[string]string, len(kvs))
 		for _, kv := range kvs {
-			println(kv.Key, string(kv.Value))
+			log.Println(kv.Key, string(kv.Value))
 			props[kv.Key] = string(kv.Value)
 		}
 		if props[name+"application_name"] != "" {
