@@ -1,27 +1,11 @@
 {
-	"ImportPath": "github.com/ridecharge/cf-versions",
+	"ImportPath": "github.com/ridecharge/cfversions",
 	"GoVersion": "go1.4",
 	"Deps": [
-		{
-			"ImportPath": "github.com/goamz/goamz/autoscaling",
-			"Rev": "2a8fed5e89ab9e16210fc337d1aac780e8c7bbb7"
-		},
-		{
-			"ImportPath": "github.com/goamz/goamz/aws",
-			"Rev": "2a8fed5e89ab9e16210fc337d1aac780e8c7bbb7"
-		},
-		{
-			"ImportPath": "github.com/goamz/goamz/cloudformation",
-			"Rev": "2a8fed5e89ab9e16210fc337d1aac780e8c7bbb7"
-		},
 		{
 			"ImportPath": "github.com/hashicorp/consul/api",
 			"Comment": "v0.5.0-82-g8cc24e4",
 			"Rev": "8cc24e4cb2c9995068ac843b25a9bd74c1000a0e"
-		},
-		{
-			"ImportPath": "github.com/vaughan0/go-ini",
-			"Rev": "a98ad7ee00ec53921f08832bc06ecf7fd600e6a1"
 		}
 	]
 }

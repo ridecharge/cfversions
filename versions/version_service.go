@@ -2,6 +2,7 @@ package versions
 
 import (
 	"encoding/json"
+	"flag"
 	"github.com/hashicorp/consul/api"
 	"io"
 	"log"
@@ -9,7 +10,6 @@ import (
 
 type versionServ struct {
 	c            *api.Client
-	env          string
 	versionNames []string
 }
 
@@ -18,10 +18,22 @@ type versionService interface {
 	encodeVersions(w io.Writer, versions []*version) error
 }
 
+var (
+	consulConfig *api.Config
+)
+
+func init() {
+	host := flag.String("consul-host", "consul", "the consul host")
+	port := flag.String("consul-port", "8500", "the consul port")
+	scheme := flag.String("consul-scheme", "http", "the consul port")
+	flag.Parse()
+	consulConfig = &api.Config{
+		Address: *host + ":" + *port,
+		Scheme:  *scheme}
+}
+
 func newVersionService() versionService {
-	client, err := api.NewClient(&api.Config{
-		Address: "192.168.59.103:8500",
-		Scheme:  "http"})
+	client, err := api.NewClient(consulConfig)
 	if err != nil {
 		log.Fatal("Could not configure consul api.", err)
 	}
@@ -30,9 +42,7 @@ func newVersionService() versionService {
 	if err != nil || kvpair == nil {
 		log.Fatal("Could not get the environment key from consul.")
 	}
-	vs := &versionServ{
-		c:   client,
-		env: string(kvpair.Value)}
+	vs := &versionServ{c: client}
 	go vs.watchVersionNames()
 	return vs
 }

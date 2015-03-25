@@ -1,2 +1,4 @@
 #!/bin/sh
-docker build -t ridecharge/cfversions .
+bin/bump -p -r && \
+docker build -t ridecharge/cfversions:$(cat VERSION) . && \
+docker tag ridecharge/cfversions:$(cat VERSION) ridecharge/cfversions:latest
