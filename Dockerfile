@@ -12,11 +12,11 @@ ENV GOROOT=/usr/local/go
 ENV PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
 # Install App
-COPY . $GOPATH/src/github.com/ridecharge/cf-versions
-WORKDIR $GOPATH/src/github.com/ridecharge/cf-versions
+COPY . $GOPATH/src/github.com/ridecharge/cfversions
+WORKDIR $GOPATH/src/github.com/ridecharge/cfversions
 RUN go get github.com/tools/godep
 RUN godep go install
-RUN mv $GOPATH/bin/cf-versions /usr/bin
+RUN mv $GOPATH/bin/cfversions /usr/bin
 
 # Cleanup
 RUN rm -r /tmp/*
@@ -25,4 +25,4 @@ RUN rm -r $GOPATH
 RUN apt-get purge -y --auto-remove git
 
 EXPOSE 8080/tcp
-ENTRYPOINT ["/usr/bin/cf-versions"]
+ENTRYPOINT ["/usr/bin/cfversions"]

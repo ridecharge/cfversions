@@ -2,116 +2,90 @@ package versions
 
 import (
 	"encoding/json"
-	"github.com/goamz/goamz/autoscaling"
-	"github.com/goamz/goamz/aws"
-	"github.com/goamz/goamz/cloudformation"
 	"github.com/hashicorp/consul/api"
 	"io"
 	"log"
-	"os"
-	"time"
-)
-
-var (
-	s VersionServ
 )
 
 type versionServ struct {
-	cf  *cloudformation.CloudFormation
-	as  *autoscaling.AutoScaling
-	env string
+	c            *api.Client
+	env          string
+	versionNames []string
 }
 
-type VersionServ interface {
-	FindVersions(names []string) ([]*version, error)
-	FindAllVersionNames() ([]string, error)
-	EncodeVersions(w io.Writer, versions []*version) error
+type versionService interface {
+	findVersions(names []string) ([]*version, error)
+	encodeVersions(w io.Writer, versions []*version) error
 }
 
-func NewVersionServ() VersionServ {
-	if s == nil {
-		s = newVersionServ()
-	}
-	return s
-}
-
-func newConsulConfig() *api.Config {
-	address := os.Getenv("CONSUL_PORT_8500_TCP_ADDR") +
-		":" + os.Getenv("CONSUL_PORT_8500_TCP_PORT")
-	return &api.Config{
-		Address: address,
-		Scheme:  "http"}
-}
-
-func newVersionServ() VersionServ {
-	client, err := api.NewClient(newConsulConfig())
+func newVersionService() versionService {
+	client, err := api.NewClient(&api.Config{
+		Address: "192.168.59.103:8500",
+		Scheme:  "http"})
 	if err != nil {
 		log.Fatal("Could not configure consul api.", err)
 	}
 
-	kvpair, _, err := client.KV().Get("environment", nil)
+	kvpair, _, err := client.KV().Get("cf/env/environment", nil)
 	if err != nil || kvpair == nil {
 		log.Fatal("Could not get the environment key from consul.")
 	}
-
-	auth, err := aws.GetAuth("", "", "", time.Now())
-	if err != nil {
-		log.Fatal("Could not find AWS Credentials")
-	}
-
-	env := string(kvpair.Value)
-	cf := cloudformation.New(auth, aws.USEast)
-	as := autoscaling.New(auth, aws.USEast)
-	return &versionServ{cf: cf, env: env, as: as}
+	vs := &versionServ{
+		c:   client,
+		env: string(kvpair.Value)}
+	go vs.watchVersionNames()
+	return vs
 }
 
-func (s *versionServ) EncodeVersions(w io.Writer, versions []*version) error {
+func (s *versionServ) findVersionNames(index uint64) ([]string, uint64, error) {
+	qo := &api.QueryOptions{WaitIndex: index}
+	names, meta, err := s.c.KV().Keys("cf/", "/", qo)
+	return names, meta.LastIndex, err
+}
+
+func (s *versionServ) watchVersionNames() {
+	var (
+		index uint64
+		err   error
+	)
+	index = 0
+	for {
+		s.versionNames, index, err = s.findVersionNames(index)
+		if err != nil {
+			log.Fatal("Error watching versionNames.", err)
+		}
+	}
+}
+
+func (s *versionServ) encodeVersions(w io.Writer, versions []*version) error {
 	log.Print("Encoding Version Objects to JSON")
 	return json.NewEncoder(w).Encode(versions)
 }
 
-func (s *versionServ) FindAllVersionNames() ([]string, error) {
-	filter := autoscaling.NewFilter()
-	filter.Add("key", "Role")
-	r, err := s.as.DescribeTags(filter, 0, "")
-	if err != nil {
-		return nil, err
+func (s *versionServ) findVersions(names []string) ([]*version, error) {
+	vn := names
+	if len(vn) == 0 {
+		vn = s.versionNames
 	}
+	vs := make([]*version, 0, len(names))
+	for _, name := range vn {
+		println("key_prefix: ", name)
+		kvs, _, err := s.c.KV().List(name, nil)
+		if err != nil {
+			return nil, err
+		}
+		if kvs == nil {
+			continue
+		}
 
-	numTags := len(r.Tags)
-	namesSet := make(map[string]bool, numTags)
-	names := make([]string, 0, numTags)
-	for _, tag := range r.Tags {
-		name := tag.Value
-		if namesSet[name] == false &&
-			name != "ntp" && name != "nat" && name != "bastion" {
-			namesSet[name] = true
-			names = append(names, name)
+		props := make(map[string]string, len(kvs))
+		for _, kv := range kvs {
+			println(kv.Key, string(kv.Value))
+			props[kv.Key] = string(kv.Value)
+		}
+		if props[name+"application_name"] != "" {
+			vs = append(vs, newVersion(props, name))
 		}
 	}
-	return names, nil
-}
-
-func (s *versionServ) FindVersions(names []string) ([]*version, error) {
-	versions := make([]*version, 0, len(names))
-	for _, name := range names {
-		stack_name := s.env + "-" + name
-		log.Printf("DescribingStack %s", stack_name)
-		response, err := s.cf.DescribeStacks(stack_name, "")
-		if err == nil {
-			outputs := make(map[string]string,
-				len(response.Stacks[0].Outputs))
-			for _, output := range response.Stacks[0].Outputs {
-				outputs[output.OutputKey] = output.OutputValue
-			}
-			versions = append(versions, NewVersion(outputs))
-		} else {
-			if err.(*cloudformation.Error).StatusCode == 400 {
-				log.Print(err)
-			} else {
-				return nil, err
-			}
-		}
-	}
-	return versions, nil
+	return vs, nil
 }

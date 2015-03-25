@@ -22,29 +22,29 @@ type notFoundVersionServ struct {
 	mockVersionServ
 }
 
-func (s *notFoundVersionServ) FindVersions(names []string) ([]*version, error) {
+func (s *notFoundVersionServ) findVersions(names []string) ([]*version, error) {
 	return make([]*version, 0, 0), nil
 }
 
-func (s *errVersionServ) FindVersions(names []string) ([]*version, error) {
+func (s *errVersionServ) findVersions(names []string) ([]*version, error) {
 	return nil, errors.New("error")
 }
 
-func (s *errVersionServ) FindAllVersionNames() ([]string, error) {
+func (s *errVersionServ) findVersionNames() ([]string, error) {
 	return nil, errors.New("error")
 }
 
-func (s *mockVersionServ) EncodeVersions(w io.Writer, versions []*version) error {
+func (s *mockVersionServ) encodeVersions(w io.Writer, versions []*version) error {
 	s.EncodeVersionsCalled = true
 	return nil
 }
 
-func (s *mockVersionServ) FindAllVersionNames() ([]string, error) {
+func (s *mockVersionServ) findVersionNames() ([]string, error) {
 	s.FindAllVersionNamesCalled = true
 	return nil, nil
 }
 
-func (s *mockVersionServ) FindVersions(names []string) ([]*version, error) {
+func (s *mockVersionServ) findVersions(names []string) ([]*version, error) {
 	s.FindVersionsCalled = true
 	return []*version{&version{}}, nil
 }
@@ -79,30 +79,6 @@ func TestServeHTTPSuccess(t *testing.T) {
 }
 
 func TestServeHTTPFindVersionErr(t *testing.T) {
-	w := httptest.NewRecorder()
-	r, _ := http.NewRequest("GET", "/versions", nil)
-	s := &errVersionServ{}
-	h := &versionHandler{s: s}
-	h.ServeHTTP(w, r)
-
-	if w.Code != 500 {
-		t.Error("HTTP 500 should be returned on errors.")
-	}
-}
-
-func TestServeHTTPNoNames(t *testing.T) {
-	w := httptest.NewRecorder()
-	r, _ := http.NewRequest("GET", "/versions", nil)
-	s := &mockVersionServ{}
-	h := &versionHandler{s: s}
-	h.ServeHTTP(w, r)
-
-	if !s.FindAllVersionNamesCalled {
-		t.Error("FindAllVersionNames should be called when no names param.")
-	}
-}
-
-func TestServeHTTPNoNamesErr(t *testing.T) {
 	w := httptest.NewRecorder()
 	r, _ := http.NewRequest("GET", "/versions", nil)
 	s := &errVersionServ{}

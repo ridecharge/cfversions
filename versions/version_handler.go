@@ -5,11 +5,11 @@ import (
 )
 
 type versionHandler struct {
-	s VersionServ
+	s versionService
 }
 
 func RegisterHandlers() {
-	http.Handle("/versions", &versionHandler{s: NewVersionServ()})
+	http.Handle("/versions", &versionHandler{s: newVersionService()})
 	http.HandleFunc("/health", health)
 }
 
@@ -20,25 +20,16 @@ func health(w http.ResponseWriter, r *http.Request) {
 func (h *versionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var (
 		names    []string
-		err      error
 		versions []*version
+		err      error
 	)
-
-	if len(r.URL.Query()["names"]) > 0 {
-		names = r.URL.Query()["names"]
-	} else {
-		if names, err = h.s.FindAllVersionNames(); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-	}
-
-	if versions, err = h.s.FindVersions(names); err != nil {
+	names = r.URL.Query()["names"]
+	if versions, err = h.s.findVersions(names); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(200)
-	h.s.EncodeVersions(w, versions)
+	h.s.encodeVersions(w, versions)
 }

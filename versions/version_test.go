@@ -6,13 +6,13 @@ import (
 
 func TestNewVersion(t *testing.T) {
 	props := map[string]string{
-		"Version":         "Version",
-		"ApplicationName": "ApplicationName",
-		"PrivateEndPoint": "PrivateEndPoint",
-		"PublicEndPoint":  "PublicEndPoint",
+		"version":           "Version",
+		"application_name":  "ApplicationName",
+		"private_end_point": "PrivateEndPoint",
+		"public_end_point":  "PublicEndPoint",
 	}
 
-	version := NewVersion(props)
+	version := newVersion(props, "")
 
 	if version.Version != "Version" {
 		t.Error("Should set Version from map.")
