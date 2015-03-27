@@ -2,11 +2,10 @@ FROM ubuntu:14.04
 
 # Install git
 RUN apt-get update && apt-get install -y git curl ca-certificates
-WORKDIR /tmp
 # Install go
-RUN curl https://storage.googleapis.com/golang/go1.4.2.linux-amd64.tar.gz -o go1.4.2.linux-amd64.tar.gz
+RUN curl https://storage.googleapis.com/golang/go1.4.2.linux-amd64.tar.gz -o /tmp/go1.4.2.linux-amd64.tar.gz
 
-RUN tar -C /usr/local -xzf go1.4.2.linux-amd64.tar.gz
+RUN tar -C /usr/local -xzf /tmp/go1.4.2.linux-amd64.tar.gz
 RUN mkdir -p /opt/go
 ENV GOPATH=/opt/go
 ENV GOROOT=/usr/local/go
