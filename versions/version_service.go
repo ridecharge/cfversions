@@ -38,10 +38,6 @@ func newVersionService() versionService {
 		log.Fatal("Could not configure consul api.", err)
 	}
 
-	kvpair, _, err := client.KV().Get("cf/env/environment", nil)
-	if err != nil || kvpair == nil {
-		log.Fatal("Could not get the environment key from consul.")
-	}
 	vs := &versionServ{c: client}
 	go vs.watchVersionNames()
 	return vs
