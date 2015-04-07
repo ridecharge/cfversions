@@ -1,15 +1,16 @@
-all: test build	push clean
+CONTAINER=ridecharge/cfversions
+VERSION=$(cat VERSION)
+
+
+all: test build	push
 
 build:  
 	bin/bump -p -r && \
-	docker build -t ridecharge/cfversions:latest . && \
-	docker build -t ridecharge/cfversions:$(cat VERSION) .
+	docker build -t $(CONTAINER):latest . && \
+	docker build -t $(CONTAINER):$(VERSION) .
 
 push:
-	docker push ridecharge/cfversions
+	docker push $(CONTAINER)
 
 test:
 	godep go test -cover ./... 
-
-clean:
-	rm versions/coverage.out
