@@ -2,7 +2,7 @@ CONTAINER=ridecharge/cfversions
 VERSION=$(cat VERSION)
 
 
-all: test build	push
+all: build push
 
 build:  
 	bin/bump -p -r && \
