@@ -1,16 +1,17 @@
-CONTAINER=ridecharge/cfversions
-VERSION=$(cat VERSION)
+DOCKER_REPO?=registry.gocurb.internal:80
+CONTAINER=$(DOCKER_REPO)/cfversions
 
 
-all: build push
+all: build push clean
 
 build:  
-	bin/bump -p -r && \
-	docker build -t $(CONTAINER):latest . && \
-	docker build -t $(CONTAINER):$(VERSION) .
+	docker build --no-cache -t $(CONTAINER):latest .
 
 push:
 	docker push $(CONTAINER)
 
 test:
 	godep go test -cover ./... 
+
+clean:
+	docker rmi $(CONTAINER)
